@@ -105,4 +105,5 @@ dist
 
 
 build/
-src/
+src/components/Error
+src/components/Container
