@@ -1,7 +1,9 @@
 import { nanoid } from 'nanoid';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 import { useState } from 'react';
+import { useLocalStorage } from '../hooks/';
 
 import { Section } from './Section';
 import { ContactsFilter } from './ContactsFilter';
@@ -10,36 +12,14 @@ import { ContactsList } from './ContactsList';
 
 import { Wrapper, TitlePhonebook, TitleContacts } from './App.styled';
 
-const useLocalStorage = (key, defaultValue) => {
-  const [state, setState] = useState(
-    () => JSON.parse(localStorage.getItem(key)) ?? defaultValue,
-  );
-
-  return [state, setState];
-};
-
 export const App = () => {
-  const [contacts, setContacts] = useState([]);
+  const [contacts, setContacts] = useLocalStorage('contacts', [
+    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+  ]);
   const [filter, setFilter] = useState('');
-
-  // const componentDidMount() {
-  //   this.setState({
-  //     contacts: localStorage.getItem('contacts')
-  //       ? JSON.parse(localStorage.getItem('contacts'))
-  //       : [
-  //           { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-  //           { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-  //           { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-  //           { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-  //         ],
-  //   });
-  // }
-
-  // const componentDidUpdate(_, prevState) {
-  //   if (prevState.contacts !== this.state.contacts) {
-  //     localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-  //   }
-  // }
 
   const handleAddContact = data => {
     const { name, number } = data;
@@ -49,35 +29,23 @@ export const App = () => {
       number,
     };
 
-    this.setState(({ contacts }) => ({ contacts: [...contacts, contact] }));
+    setContacts(s => [...s, contact]);
   };
 
   const handleSearchContact = e => {
-    this.setState({ filter: e.currentTarget.value });
+    setFilter(e.currentTarget.value);
   };
 
-  const handleFilterContact = () => {
-    const { contacts, filter } = this.state;
+  const filterContact = () => {
     const normalizeFilterValue = filter.toLowerCase();
     return contacts.filter(({ name }) =>
       name.toLowerCase().includes(normalizeFilterValue),
     );
   };
 
-  const handleDeleteContact = todoId => {
-    this.setState(({ contacts }) => ({
-      contacts: contacts.filter(contact => contact.id !== todoId),
-    }));
+  const handleDeleteContact = currentId => {
+    setContacts(s => s.filter(contact => contact.id !== currentId));
   };
-
-  // const {
-  //   handleAddContact,
-  //   handleSearchContact,
-  //   handleFilterContact,
-  //   handleDeleteContact,
-  // } = this;
-  // const { filter, contacts } = this.state;
-  // const displayedContacts = handleFilterContact();
 
   return (
     <Section>
@@ -87,7 +55,7 @@ export const App = () => {
         <ContactsFilter value={filter} onSearchContact={handleSearchContact} />
         <TitleContacts>Contacts</TitleContacts>
         <ContactsList
-          contacts={displayedContacts}
+          contacts={filterContact()}
           onDeleteContact={handleDeleteContact}
         />
       </Wrapper>
